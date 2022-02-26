@@ -218,7 +218,27 @@ class MainApp(MDApp):
         add= self.root.get_screen('signup')
         email = add.ids["email"].text
         password=add.ids["password"].text
-        try:
+        if (email==''):
+            self.dialog = MDDialog(
+                title="INVALID LOGIN",
+                text="Please enter corrent login id",
+                size_hint=(0.7, 1),
+                radius=[20, 7, 20, 7],
+                buttons=[
+                    MDFlatButton(
+                        text="OK",
+                        theme_text_color="Error",
+                        text_color=self.theme_cls.primary_color, on_release=self.closeDialog
+                    ),
+                    MDFlatButton(
+                        text="CANCEL",
+                        theme_text_color="Custom",
+                        text_color=self.theme_cls.primary_color,
+                    )
+                    , ], )
+            self.dialog.open()
+
+        else:
             conn = sqlite3.connect('accounts.db')
             c = conn.cursor()
             c.execute("INSERT INTO accounts VALUES (?, ?)", [email, password])
@@ -237,26 +257,6 @@ class MainApp(MDApp):
             self.dialog.open()
             conn.commit()
             conn.close()
-
-        except:
-            self.dialog = MDDialog(
-                title="INVALID LOGIN",
-                text="Please enter corrent login id",
-                size_hint=(0.7, 1),
-                radius=[20, 7, 20, 7],
-                buttons=[
-                    MDFlatButton(
-                        text="OK",
-                        theme_text_color="Error",
-                        text_color=self.theme_cls.primary_color, on_release=self.closeDialog
-                    ),
-                    MDFlatButton(
-                        text="CANCEL",
-                        theme_text_color="Custom",
-                        text_color=self.theme_cls.primary_color,
-                    )
-                , ], )
-            self.dialog.open()
     def log(self, *args):
         new = self.root.get_screen('login')
         email = new.ids["email"].text
