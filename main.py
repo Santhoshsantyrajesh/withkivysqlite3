@@ -1,4 +1,3 @@
-import pyrebase
 from kivymd.app import MDApp
 from kivy.uix.button import Button
 from kivymd.uix.button import MDFlatButton
@@ -13,6 +12,10 @@ from kivymd.uix.label import MDLabel
 from kivy.core.window import Window
 from kivy.lang import Builder
 import sqlite3
+from kivymd.uix.datatables import MDDataTable
+from kivy.metrics import dp
+from plyer import filechooser
+from kivy.uix.anchorlayout import AnchorLayout
 s = """
 ScreenManager:
     MenuScreen:
@@ -20,6 +23,8 @@ ScreenManager:
     UploadScreen:
     LoginScreen:
     SignupScreen:
+    ClientsTable:
+    firstpage:
 <MenuScreen>:
     name: 'menu'
     MDRectangleFlatButton:
@@ -136,6 +141,35 @@ ScreenManager:
             pos_hint: {'center_x':0.4,'center_y':0.5}
             md_bg_color: 1, 0, 1, 1
             on_press: root.manager.current = 'login'
+<firstpage>:
+    BoxLayout:
+        MDBottomAppBar:
+            MDToolbar:
+                title: "Title"
+                icon: "git"
+                type: "bottom"
+                left_action_items: [["menu", lambda x:nav_drawer.toggle_nav_drawer()]]
+                mode: "end"
+                Widget:
+            MDNavigationDrawer:
+                id: nav_drawer
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: .75
+        size_hint_max_x: dp(800)
+        size_hint_min_x: min(dp(400), root.width)
+        pos_hint: {'center_x': .5}
+        padding: 0, dp(16), 0, 0
+    ScrollView:
+        MDList:
+            id: container
+   
+            
+<ClientsTable>:
+    name: 'Clientstable'
+ 
+
+ 
         """
 LO = '''
 MDScreen:
@@ -158,6 +192,31 @@ MDScreen:
             font_size:"14sp"
 
      '''
+class ClientsTable(Screen):
+    def load_table(self):
+        layout = AnchorLayout()
+        self.data_tables =MDDataTable(
+            pos_hint={'center_y': 0.5, 'center_x': 0.5},
+            size_hint=(0.9, 0.6),
+            use_pagination=True,
+            check=True,
+            column_data=[
+                ("No.", dp(30)),
+                ("Head 1", dp(30)),
+                ("Head 2", dp(30)),
+                ("Head 3", dp(30)),
+                ("Head 4", dp(30)), ],
+            row_data=[
+                (f"{i + 1}", "", "", "", "")
+                for i in range(50)], )
+        self.add_widget(self.data_tables)
+        return layout
+
+
+
+
+    def on_enter(self):
+        self.load_table()
 
 
 class MenuScreen(Screen):
@@ -170,6 +229,8 @@ class ProfileScreen(Screen):
 
 class UploadScreen(Screen):
     pass
+class firstpage(Screen):
+    pass
 
 
 class LoginScreen(MDScreen):
@@ -177,7 +238,6 @@ class LoginScreen(MDScreen):
 
 class SignupScreen(Screen):
     pass
-
 
 
 
@@ -203,6 +263,8 @@ class MainApp(MDApp):
         scr.add_widget(UploadScreen(name='upload'))
         scr.add_widget(LoginScreen(name='login'))
         scr.add_widget(SignupScreen(name='signup'))
+        scr.add_widget(ClientsTable(name='Clientstable'))
+        scr.add_widget(firstpage(name='new'))
         return scr
 
     def navigation_draw(self):
@@ -265,6 +327,7 @@ class MainApp(MDApp):
         c = conn.cursor()
         c.execute("SELECT * FROM accounts WHERE uname=? and pwd=?", [email,password])
         if c.fetchone()==None:
+
                 self.dialog = MDDialog(
                     title="INVALID LOGIN",
                     text="Please enter correct id and password",
@@ -291,7 +354,7 @@ class MainApp(MDApp):
                         text_color=self.theme_cls.primary_color, on_release=self.closeDialog
                     ), ], )
             self.dialog.open()
-            scr.current = 'menu'
+            scr.current = 'Clientstable'
             conn.commit()
             conn.close()
     def closeDialog(self, inst):
